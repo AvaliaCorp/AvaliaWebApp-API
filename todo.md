@@ -5,3 +5,5 @@
 2. Criar modelos de avaliações e comentários
 
 3. Criar operações com avaliações e comentários
+
+4. Criar testes
