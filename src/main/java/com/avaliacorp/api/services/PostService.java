@@ -1,6 +1,7 @@
 package com.avaliacorp.api.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -42,9 +43,19 @@ public class PostService {
         return postRepository.findByAuthorId(authorId);
     }
 
-    public List<PostModel> searchByFirmCNPJ(String cnpj){
+    public Optional<PostModel> searchByFirmCNPJ(String cnpj){
         if(cnpj == null) throw new IllegalArgumentException("cnpj param must not be null");
         return postRepository.findByFkCNPJ(cnpj);
+    }
+
+    public List<PostModel> searchByTitle(String title, Integer limit){
+        if(title == null) throw new IllegalArgumentException("title param must not be null");
+        return postRepository.findByTitle(title, limit);
+    }
+
+    public void delete(Integer id){
+        if(id == null) throw new IllegalArgumentException("id param must not be null");
+        postRepository.deleteById(id);
     }
 
 }

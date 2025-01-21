@@ -1,5 +1,7 @@
 package com.avaliacorp.api.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,8 +63,22 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public String searchPosts(@RequestParam String title, Integer limit) {
-        return new String(); //TODO
+    public ResponseEntity<Object> searchPosts(@RequestParam String title, Integer limit) {
+
+        try {
+            List<PostModel> posts = service.searchByTitle(title, limit);
+            if(posts.isEmpty()){
+                return ResponseEntity.status(HttpStatus.OK).body("No posts were found");
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(posts);
+        }
+        catch (Exception e) {
+            if(e instanceof IllegalArgumentException){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            }
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
     }
     
     
