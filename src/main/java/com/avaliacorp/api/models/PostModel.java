@@ -1,5 +1,7 @@
 package com.avaliacorp.api.models;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -13,7 +15,7 @@ public class PostModel {
     @Id
     private Integer id;
 
-    @Column("title")
+    @Column("titulo")
     private String title;
 
     @Column("empresa_cnpj")
@@ -21,6 +23,9 @@ public class PostModel {
 
     @Column("usuario_id")
     private String authorId;
+
+    @Column("criado_em")
+    private LocalDateTime createdAt;
 
     @Column("nota")
     private String grade;
@@ -32,6 +37,7 @@ public class PostModel {
         this.title = title;
         this.fkCNPJ = fkCNPJ;
         this.authorId = authorId;
+        this.createdAt = LocalDateTime.now();
         this.grade = grade;
         this.text = text;
     }

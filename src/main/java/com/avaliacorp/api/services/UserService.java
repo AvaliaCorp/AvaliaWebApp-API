@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.avaliacorp.api.exceptions.EmailAlreadyInUseException;
-import com.avaliacorp.api.exceptions.UserNotFoundException;
+import com.avaliacorp.api.exceptions.NotFoundException;
+import com.avaliacorp.api.models.PostModel;
 import com.avaliacorp.api.models.UserModel;
+import com.avaliacorp.api.repositories.PostRepository;
 import com.avaliacorp.api.repositories.UserRepository;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
@@ -17,9 +19,11 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, PostRepository postRepository){
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
     }
 
     @Transactional
@@ -37,13 +41,13 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel findByEmail(String email) throws UserNotFoundException {
-        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException());
+    public UserModel findByEmail(String email) throws NotFoundException {
+        return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("The email was not found"));
     }
 
     @Transactional
-    public UserModel findById(String id) throws UserNotFoundException {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
+    public UserModel findById(String id) throws NotFoundException {
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("The id was not found"));
     }
 
     @Transactional
@@ -57,13 +61,19 @@ public class UserService {
     }
 
     @Transactional
+    public List<PostModel> findUserPosts(String id){
+        userRepository.findById(id).orElseThrow(() -> new NotFoundException("The user id was not found"));
+        return postRepository.findByAuthorId(id);
+    }
+
+    @Transactional
     public UserModel update(UserModel data){
         return userRepository.save(data);
     }
 
     @Transactional
     public void delete(String id){
-        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
+        userRepository.findById(id).orElseThrow(() -> new NotFoundException("The id was not found"));
         userRepository.deleteById(id);
     }
 
