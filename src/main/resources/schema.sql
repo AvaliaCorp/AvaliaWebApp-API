@@ -5,7 +5,7 @@ create table empresa(
 	id varchar(40) primary key default(uuid()),
     nome varchar(45) not null,
 	email varchar(45) unique not null,
-	senha varchar(45) not null,
+	senha varchar(100) not null,
 	CNPJ varchar(45) unique not null,
     `version` long
 );
@@ -14,15 +14,8 @@ create table usuario(
 	id varchar(40) primary key default(uuid()),
 	nome varchar(45) not null,
 	email varchar(45) unique not null,
-	senha varchar(45) not null,
+	senha varchar(100) not null,
     `version` long
-);
-
-create table produto_servico (
-    id integer auto_increment primary key,
-    nome varchar(45) not null,
-    empresa_cnpj varchar(45),
-    foreign key (empresa_cnpj) references empresa(cnpj)
 );
 
 create table avaliacao(
@@ -31,12 +24,10 @@ create table avaliacao(
     criado_em datetime default current_timestamp,
     texto text not null,
 	nota real,
-    produto_servico_id integer,
     empresa_cnpj varchar(45),
 	usuario_id varchar(40),
 	foreign key (usuario_id) references usuario(id),
-    foreign key (empresa_cnpj) references empresa(cnpj),
-    foreign key (produto_servico_id) references produto_servico(id)
+    foreign key (empresa_cnpj) references empresa(cnpj)
 );
 
 create table comentario(
@@ -44,9 +35,11 @@ create table comentario(
     texto text not null,
     criado_em datetime default current_timestamp,
     autor_id varchar(40) not null,
-    avaliacao_id integer not null,
+    avaliacao_id integer,
+    comentario_id integer,
     constraint fk_autor foreign key (autor_id) references usuario(id),
-    constraint fk_avaliacao foreign key (avaliacao_id) references avaliacao(id)
+    constraint fk_avaliacao foreign key (avaliacao_id) references avaliacao(id),
+    constraint fk_comentario foreign key (comentario_id) references comentario(id)
 );
 
 create table resposta_empresa (
