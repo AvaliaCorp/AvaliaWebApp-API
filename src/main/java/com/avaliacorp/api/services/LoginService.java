@@ -5,8 +5,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.avaliacorp.api.ApiApplication;
-import com.avaliacorp.api.controllers.AuthController.ResponseGetLoggedUser;
 import com.avaliacorp.api.exceptions.LogInFailedException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.FirmModel;
@@ -39,15 +37,14 @@ public class LoginService {
     }
 
     public String login(String email, String password){
+
         jwtTools.init();
 
         Optional<UserModel> user = userRepository.findByEmail(email);
 
         if(user.isPresent()){
             if(comparePassword(password, user.get().getPassword())){
-                String token =  jwtTools.genJwt("id", user.get().getId(), TypeOfUser.NormalUser);
-                ApiApplication.setToken(token);
-                return token;
+                return jwtTools.genJwt("id", user.get().getId(), TypeOfUser.NormalUser);
             }
             throw new LogInFailedException();
         }
@@ -55,10 +52,8 @@ public class LoginService {
         Optional<FirmModel> firm = firmRepository.findByEmail(email);
 
         if(firm.isPresent()){
-            if(comparePassword(password, firm.get().getEmail())) {
-                String token = jwtTools.genJwt(email, password, TypeOfUser.Professional);
-                ApiApplication.setToken(token);
-                return token;
+            if(comparePassword(password, firm.get().getPassword())) {
+                return jwtTools.genJwt("id", firm.get().getId(), TypeOfUser.Professional);
             }
             throw new LogInFailedException();
         }
@@ -67,14 +62,4 @@ public class LoginService {
 
     }
 
-    public void logout(){
-        ApiApplication.setToken("unlogged");
-    }
-
-    public ResponseGetLoggedUser getUserLogged(){
-        var decoded = jwtTools.verifyToken(ApiApplication.getToken());
-        String userId = decoded.getClaim("id").asString();
-        String userType = decoded.getClaim("type").asString();
-        return new ResponseGetLoggedUser(userId, userType);
-    }
 }

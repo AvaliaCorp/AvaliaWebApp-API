@@ -37,7 +37,7 @@ public class FirmController {
         try {
             FirmModel result = firmService.create(firm);
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
-        } 
+        }
         catch (Exception e) {
             if(e instanceof EmailAlreadyInUseException){
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

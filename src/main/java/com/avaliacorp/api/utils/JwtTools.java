@@ -1,5 +1,7 @@
 package com.avaliacorp.api.utils;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +30,14 @@ public class JwtTools {
     }
 
     public String genJwt(String claimName, String value, TypeOfUser typeOfUser){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, 24);
+        Date expiresAt = calendar.getTime();
         return JWT.create()
         .withClaim("id", value)
         .withClaim("type",typeOfUser.toString())
         .withJWTId(UUID.randomUUID().toString())
+        .withExpiresAt(expiresAt)
         .sign(algorithm);
     }
 
@@ -39,4 +45,5 @@ public class JwtTools {
         DecodedJWT decodedJWT = verifier.verify(token);
         return decodedJWT;
     }
+
 }

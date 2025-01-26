@@ -36,8 +36,14 @@ public class FirmService {
         String uuid = UUID.randomUUID().toString();
         String hashedPassword = BCrypt.withDefaults().hashToString(12, firm.getPassword().toCharArray());
         firm.setId(uuid);
+        firm.setName(firm.getName().toLowerCase());
         firm.setPassword(hashedPassword);
         return firmRepository.save(firm);
+    }
+
+    @Transactional
+    public FirmModel findById(String id) throws NotFoundException {
+        return firmRepository.findById(id).orElseThrow(() -> new NotFoundException("The Firm Id was not found"));
     }
 
     @Transactional

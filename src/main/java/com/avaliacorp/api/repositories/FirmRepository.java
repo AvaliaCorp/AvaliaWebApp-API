@@ -14,7 +14,8 @@ public interface FirmRepository extends CrudRepository<FirmModel, String> {
 
     Optional<FirmModel> findByCNPJ(String cNPJ);
 
-    Optional<FirmModel> findByEmail(String email);
+    @Query("SELECT * FROM empresa WHERE email = :email")
+    Optional<FirmModel> findByEmail(@Param("email") String email);
 
     List<FirmModel> findManyByName(String name);
 
