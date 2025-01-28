@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.avaliacorp.api.exceptions.ForbiddenActionException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.PostModel;
+import com.avaliacorp.api.models.TokenModel;
 import com.avaliacorp.api.services.PostService;
 import com.avaliacorp.api.utils.JwtTools;
 
@@ -36,7 +38,11 @@ public class PostController {
 
         try {
             auth = auth.replace("Bearer ", "");
-            PostModel result = service.create(post, auth);
+            TokenModel token = jwtTools.verifyAndDecodeToken(auth);
+            if(token.getType().equals("Professional")){
+                throw new ForbiddenActionException("An Firm can not create a post.");
+            }
+            PostModel result = service.create(post, token.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         }
         catch (Exception e) {
@@ -45,6 +51,9 @@ public class PostController {
             }
             if(e instanceof NotFoundException){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            }
+            if(e instanceof ForbiddenActionException){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
             }
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

@@ -44,7 +44,7 @@ public class AuthController {
     @Autowired
     private JwtTools jwtTools;
 
-    @PostMapping("/login") //Indica que a função mapeia uma rota HTTP do tipo patch chamada /login
+    @PostMapping("/login") //Indica que a função mapeia uma rota HTTP do tipo post chamada /login
     public ResponseEntity<String> login(@RequestBody LoginModel login) { //@RequestBody, indica para o Controller geral do spring que o parametro login deve ser preenchido pelo corpo da requisição
 
         try {

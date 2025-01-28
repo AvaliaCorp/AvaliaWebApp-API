@@ -34,5 +34,3 @@ build/
 
 ### others ###
 .env
-test
-rest.http

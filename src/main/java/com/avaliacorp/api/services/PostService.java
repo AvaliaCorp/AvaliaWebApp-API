@@ -5,15 +5,13 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.avaliacorp.api.exceptions.ForbbidenActionException;
+import com.avaliacorp.api.exceptions.ForbiddenActionException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.PostModel;
-import com.avaliacorp.api.models.TokenModel;
 import com.avaliacorp.api.models.UserModel;
 import com.avaliacorp.api.repositories.FirmRepository;
 import com.avaliacorp.api.repositories.PostRepository;
 import com.avaliacorp.api.repositories.UserRepository;
-import com.avaliacorp.api.utils.JwtTools;
 
 @Service
 public class PostService {
@@ -21,31 +19,21 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FirmRepository firmRepository;
-    private final JwtTools jwtTools;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository, FirmRepository firmRepository, JwtTools jwtTools){
+    public PostService(PostRepository postRepository, UserRepository userRepository, FirmRepository firmRepository){
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.firmRepository = firmRepository;
-        this.jwtTools = jwtTools;
-        jwtTools.init();
     }
 
-    public PostModel create(PostModel post, String authToken) throws IllegalArgumentException{
+    public PostModel create(PostModel post, String authorId) throws IllegalArgumentException{
         if(post.getFkCNPJ() != null && !post.getFkCNPJ().isEmpty()){
             firmRepository.findByCNPJ(post.getFkCNPJ()).orElseThrow(() -> new NotFoundException("The firm CNPJ was not found"));
         }
 
-        var decoded = jwtTools.verifyToken(authToken);
-        TokenModel token = TokenModel.formatDecodedToken(decoded);
+        userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("The Author id was not found"));
 
-        if(token.getType().equals("Professional")){
-            throw new ForbbidenActionException("A firm cannot create a post");
-        }
-
-        userRepository.findById(token.getId()).orElseThrow(() -> new NotFoundException("The Author id was not found"));
-
-        post.setAuthorId(token.getId());
+        post.setAuthorId(authorId);
         post.setCreatedAt(LocalDateTime.now());
 
         return postRepository.save(post);
@@ -85,7 +73,7 @@ public class PostService {
         PostModel post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("The post was not found"));
 
         //Se o id usuário não for igual ao id do autor do post, mandará um erro de ação proibida
-        if(!user.getId().equals(post.getAuthorId())) throw new ForbbidenActionException("The user is not the author of the post");
+        if(!user.getId().equals(post.getAuthorId())) throw new ForbiddenActionException("The user is not the author of the post");
 
         //Finalmente, se nenhum dos erros anteriores ocorreu o post será deletado
         postRepository.deleteById(id);

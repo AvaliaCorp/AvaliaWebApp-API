@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.PostModel;
+import com.avaliacorp.api.models.TokenModel;
 import com.avaliacorp.api.models.UserModel;
 import com.avaliacorp.api.services.UserService;
 import com.avaliacorp.api.utils.JwtTools;
@@ -88,7 +89,6 @@ public class UserController {
         }
 
     }
-    
 
     @GetMapping("/search")
     public ResponseEntity<Object> searchUsers(@RequestParam String name, @RequestParam Integer limit) {
@@ -108,10 +108,12 @@ public class UserController {
     public record GetUserParams(String id, String email) {}
 
     @PutMapping("/edit")
-    public ResponseEntity<Object> editUser(@RequestBody EditUserParams data) {
+    public ResponseEntity<Object> editUser(@RequestHeader("Authorization") String auth, @RequestBody EditUserParams data) {
 
         try {
-            UserModel user = userService.findById(data.id);
+            auth = auth.replace("Bearer ", "");
+            TokenModel token = jwtTools.verifyAndDecodeToken(auth);
+            UserModel user = userService.findById(token.getId());
             if(data.password != null){
                 String hashedPassword = BCrypt.withDefaults().hashToString(12, data.password.toCharArray());
                 user.setPassword(hashedPassword);
@@ -129,7 +131,7 @@ public class UserController {
         }
 
     }
-    public record EditUserParams(String id, String name, String email, String password) {}
+    public record EditUserParams(String name, String email, String password) {}
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteUser(@RequestParam String id){

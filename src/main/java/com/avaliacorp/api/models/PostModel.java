@@ -24,16 +24,20 @@ public class PostModel {
     @Column("usuario_id")
     private String authorId;
 
-    @Column("criado_em")
-    private LocalDateTime createdAt;
-
     @Column("nota")
     private String grade;
 
     @Column("texto")
     private String text;
 
+    @Column("likes")
+    private Long likes;
+
+    @Column("criado_em")
+    private LocalDateTime createdAt;
+
     public PostModel(Integer id, String title, String fkCNPJ, String authorId, String grade, String text){
+        this.id = id;
         this.title = title;
         this.fkCNPJ = fkCNPJ;
         this.authorId = authorId;
