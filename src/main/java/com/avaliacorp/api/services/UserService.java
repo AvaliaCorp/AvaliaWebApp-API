@@ -15,7 +15,7 @@ import com.avaliacorp.api.repositories.UserRepository;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
-@Service
+@Service//Define pro String que é um Service, também sub-entende que é um componente
 public class UserService {
 
     private final UserRepository userRepository;
@@ -48,11 +48,6 @@ public class UserService {
     @Transactional
     public UserModel findById(String id) throws NotFoundException {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("The id was not found"));
-    }
-
-    @Transactional
-    public List<UserModel> searchUsers(String name){
-        return userRepository.findManyByName(name + "%");
     }
 
     @Transactional

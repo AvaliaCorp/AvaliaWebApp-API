@@ -9,37 +9,30 @@ import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 
 @Data
-@Table("comentario")
-public class CommentModel {
+@Table("resposta_empresa")
+public class AnswerModel {
 
     @Id
     private Integer id;
 
-    @Column("texto")
+    @Column("resposta")
     private String text;
 
-    @Column("autor_id")
-    private String authorId;
+    @Column("empresa_cnpj")
+    private String cnpj;
 
     @Column("avaliacao_id")
     private Integer postId;
 
-    @Column("comentario_id")
-    private Integer commentId;
-
-    @Column("likes")
-    private Long likes;
-
-    @Column("criado_em")
+    @Column("data_resposra")
     private LocalDateTime createdAt;
 
-
-    public CommentModel(String text, String authorId, Integer postId, Integer commentId, LocalDateTime createdAt){
+    public AnswerModel(Integer id, Integer postId, String text, String cnpj, LocalDateTime createdAt){
+        this.id = id;
         this.text = text;
+        this.cnpj = cnpj;
         this.postId = postId;
-        this.authorId = authorId;
-        this.commentId = commentId;
         this.createdAt = createdAt;
     }
-
+    
 }

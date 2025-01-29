@@ -14,7 +14,7 @@ import com.avaliacorp.api.repositories.FirmRepository;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
-@Service
+@Service//Define pro String que é um Service, também sub-entende que é um componente
 public class FirmService {
 
     private final FirmRepository firmRepository;
@@ -49,14 +49,6 @@ public class FirmService {
     @Transactional
     public FirmModel findByCNPJ(String CNPJ) throws NotFoundException {
         return firmRepository.findByCNPJ(CNPJ).orElseThrow(() -> new NotFoundException("The CNPJ was not found"));
-    }
-
-    @Transactional
-    public List<FirmModel> searchByName(String name) throws IllegalArgumentException {
-        if(name == null){
-            throw new IllegalArgumentException("Name param must not null");
-        }
-        return firmRepository.findManyByName(name);
     }
 
     @Transactional

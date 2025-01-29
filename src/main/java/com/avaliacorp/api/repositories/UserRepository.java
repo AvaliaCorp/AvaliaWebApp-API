@@ -11,12 +11,9 @@ import com.avaliacorp.api.models.UserModel;
 
 public interface UserRepository extends CrudRepository<UserModel, String> {
 
-    Optional<UserModel> findByEmail(String email);
+    Optional<UserModel> findByEmail(String email);//Procura por usuário pelo email
 
-    @Query("SELECT * FROM usuario WHERE nome LIKE :name")
-    List<UserModel> findManyByName(@Param("name") String name);
-
-    @Query("SELECT * FROM usuario WHERE nome LIKE :name LIMIT :limit")
+    @Query("SELECT * FROM usuario WHERE nome LIKE :name LIMIT :limit")//Pesquisa por vários usuários pelo nome com um limite definido
     List<UserModel> findManyByName(@Param("name") String name,@Param("limit") Integer limit);
 
 }

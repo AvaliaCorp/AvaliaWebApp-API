@@ -10,12 +10,12 @@ import com.avaliacorp.api.models.PostModel;
 
 public interface PostRepository extends CrudRepository<PostModel, Integer> {
 
-    @Query("SELECT * FROM avaliacao WHERE empresa_cnpj = :fkCNPJ")
+    @Query("SELECT * FROM avaliacao WHERE empresa_cnpj = :fkCNPJ")//Procura vários posts pela foreign key empresa_cnpj
     List<PostModel> findByFkCNPJ(@Param("fkCNPJ") String fkCNPJ);
 
-    List<PostModel> findByAuthorId(String authorId);
+    List<PostModel> findByAuthorId(String authorId);//Procura vários posts pelo Id do Autor
 
-    @Query("SELECT * FROM avaliacao WHERE titulo LIKE :title LIMIT :limit")
+    @Query("SELECT * FROM avaliacao WHERE titulo LIKE :title LIMIT :limit")//Pesquisa vários posts pelo titulo com um limite definido
     List<PostModel> findByTitle(@Param("title") String title, @Param("limit") Integer limit);
 
 }

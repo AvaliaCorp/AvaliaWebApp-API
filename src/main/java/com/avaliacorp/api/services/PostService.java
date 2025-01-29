@@ -13,7 +13,7 @@ import com.avaliacorp.api.repositories.FirmRepository;
 import com.avaliacorp.api.repositories.PostRepository;
 import com.avaliacorp.api.repositories.UserRepository;
 
-@Service
+@Service//Define pro String que é um Service, também sub-entende que é um componente
 public class PostService {
 
     private final PostRepository postRepository;

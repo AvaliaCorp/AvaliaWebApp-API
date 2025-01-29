@@ -16,7 +16,7 @@ import com.avaliacorp.api.utils.TypeOfUser;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
-@Service
+@Service//Define pro String que é um Service, também sub-entende que é um componente
 public class LoginService {
 
     @Autowired
@@ -44,7 +44,7 @@ public class LoginService {
 
         if(user.isPresent()){
             if(comparePassword(password, user.get().getPassword())){
-                return jwtTools.genJwt("id", user.get().getId(), TypeOfUser.NormalUser);
+                return jwtTools.genJwt(user.get().getId(), TypeOfUser.NormalUser);
             }
             throw new LogInFailedException();
         }
@@ -53,7 +53,7 @@ public class LoginService {
 
         if(firm.isPresent()){
             if(comparePassword(password, firm.get().getPassword())) {
-                return jwtTools.genJwt("id", firm.get().getId(), TypeOfUser.Professional);
+                return jwtTools.genJwt(firm.get().getId(), TypeOfUser.Professional);
             }
             throw new LogInFailedException();
         }
