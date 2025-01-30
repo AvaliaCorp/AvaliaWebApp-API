@@ -27,9 +27,6 @@ public class CommentModel {
     @Column("comentario_id")
     private Integer commentId;
 
-    @Column("likes")
-    private Long likes;
-
     @Column("criado_em")
     private LocalDateTime createdAt;
 

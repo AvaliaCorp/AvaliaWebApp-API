@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.avaliacorp.api.exceptions.ForbiddenActionException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.CommentModel;
+import com.avaliacorp.api.models.LikeModel;
 import com.avaliacorp.api.models.UserModel;
 import com.avaliacorp.api.repositories.CommentRepository;
+import com.avaliacorp.api.repositories.LikeRepository;
 import com.avaliacorp.api.repositories.PostRepository;
 import com.avaliacorp.api.repositories.UserRepository;
 
@@ -20,12 +22,14 @@ public class CommentService {//Serviço que opera os comentários (comments)
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final LikeRepository likeRepository;
 
     //Construtor, inicializando os repositórios (como é componente, quem faz isso é o spring)
-    public CommentService(CommentRepository commentRepository, UserRepository userRepository, PostRepository postRepository){
+    public CommentService(CommentRepository commentRepository, UserRepository userRepository, PostRepository postRepository, LikeRepository likeRepository){
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.likeRepository = likeRepository;
     }
 
     private void verifyString(String str, String errorMessage) throws RuntimeException {
@@ -106,6 +110,42 @@ public class CommentService {//Serviço que opera os comentários (comments)
         //Finalmente, salva as mudanças
         comment.setText(text);
         return commentRepository.save(comment);
+    }
+
+    public void incrementLike(Integer id, String userId){
+        //Verifica se não é nulo
+        verifyInteger(id, "Id param must not be null");
+        verifyString(userId, "UserId param must not be null");
+
+        //Verifica se existe
+        commentRepository.findById(id).orElseThrow(() -> new NotFoundException("The Comment was not found"));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("The User was not found"));
+
+        LikeModel like = new LikeModel(userId, null, id);
+
+        //Verifica se o like já existe (Se o usuário já deu like)
+        var alreadyLiked = likeRepository.findUnique(like);
+        if(!(alreadyLiked == null)){
+            throw new ForbiddenActionException("Forbidden, the user already liked the comment");
+        }
+
+        //Por fim, salva
+        likeRepository.save(like);
+    }
+
+    public void dislike(Integer id, String userId){
+        verifyInteger(id, "Id param must not be null");
+        verifyString(userId, "UserId param must not be null");
+
+        commentRepository.findById(id).orElseThrow(() -> new NotFoundException("The Comment was not found"));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("The User was not found"));
+
+        LikeModel like = new LikeModel(userId, null, id);
+
+        var isLiked = likeRepository.findUnique(like);
+        verifyString(isLiked.getUserId(), "User does not liked the Comment");
+
+        likeRepository.delete(like);
     }
 
     @Transactional//Deleta um comentário, recebe o id do comentário e o id do autor do comentário
