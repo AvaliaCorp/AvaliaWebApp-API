@@ -18,7 +18,7 @@ import jakarta.annotation.PostConstruct;
 @Component//Classe para gerar e decodificar token JWT
 public class JwtTools {
 
-    @Value("${JWT_SECRET}")
+    @Value("${secret.jwt}")
     private String secret;//Variável secret guarda o segredo definido na variável de ambiente JWT_SECRET
     private Algorithm algorithm;//Váriavel que guarda o algoritmo gerado para encriptação e descriptografia
     private JWTVerifier verifier;//Objeto que guarda funções para verificar e descriptografar tokens JWT

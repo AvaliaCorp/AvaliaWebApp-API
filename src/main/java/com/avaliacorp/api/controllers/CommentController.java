@@ -46,12 +46,12 @@ public class CommentController {
         }
         catch (Exception e) {
             if(e instanceof IllegalArgumentException){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getClass() + ": " + e.getMessage());
             }
             if(e instanceof ForbiddenActionException){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getClass() + ": " + e.getMessage());
             }
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
         }
 
     }
@@ -65,12 +65,12 @@ public class CommentController {
         }
         catch (Exception e) {
             if(e instanceof IllegalArgumentException){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getClass() + ": " + e.getMessage());
             }
             if(e instanceof NotFoundException){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
             }
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
         }
 
     }
@@ -84,12 +84,12 @@ public class CommentController {
         }
         catch (Exception e) {
             if(e instanceof IllegalArgumentException){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getClass() + ": " + e.getMessage());
             }
             if(e instanceof NotFoundException){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
             }
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
         }
     }
 
@@ -98,15 +98,77 @@ public class CommentController {
 
         try {
             auth = auth.replace("Bearer ", "");
+            System.out.println(auth);
             TokenModel token = jwtTools.verifyAndDecodeToken(auth);
             var comments = service.update(params.id, token.getId(), params.text);
             return ResponseEntity.ok().body(comments);
         }
         catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            if(e instanceof IllegalArgumentException){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof NotFoundException){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof ForbiddenActionException){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getClass() + ": " + e.getMessage());
+            }
+            return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
         }
     }
     record UpdateCommentParams(Integer id, String text){};
+
+    @PatchMapping("/like")
+    public ResponseEntity<String> likeComment(@RequestHeader("Authorization") String auth, @RequestParam Integer id){
+
+        try {
+            auth = auth.replace("Bearer ", "");
+            TokenModel token = jwtTools.verifyAndDecodeToken(auth);
+            if(token.getType().equals("Professional")){
+                throw new ForbiddenActionException("Firm can not like comments");
+            }
+            service.incrementLike(id, token.getId());
+            return ResponseEntity.ok().body("Liked");
+        }
+        catch (Exception e) {
+            if(e instanceof IllegalArgumentException){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof NotFoundException){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof ForbiddenActionException){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getClass() + ": " + e.getMessage());
+            }
+            return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
+        }
+
+    }
+
+    @PatchMapping("/dislike")
+    public ResponseEntity<String> dislikeComment(@RequestHeader("Authorization") String auth, @RequestParam Integer id){
+
+        try {
+            auth = auth.replace("Bearer ", "");
+            TokenModel token = jwtTools.verifyAndDecodeToken(auth);
+            if(token.getType().equals("Professional")){
+                throw new ForbiddenActionException("Firm can not like comments and neither dislike");
+            }
+            service.dislike(id, token.getId());
+            return ResponseEntity.ok().body("Disliked");
+        } catch (Exception e) {
+            if(e instanceof IllegalArgumentException){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof ForbiddenActionException){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof NotFoundException){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
+            }
+            return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
+        }
+    }
 
     @DeleteMapping("/delete")
     public ResponseEntity<Object> deleteComment(@RequestHeader("Authorization") String auth, @RequestParam Integer id){
@@ -118,6 +180,15 @@ public class CommentController {
             return ResponseEntity.ok().body("Comment deleted");    
         }
         catch (Exception e) {
+            if(e instanceof IllegalArgumentException){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof ForbiddenActionException){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getClass() + ": " + e.getMessage());
+            }
+            if(e instanceof NotFoundException){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
+            }
             return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
         }
 

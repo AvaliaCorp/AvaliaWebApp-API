@@ -30,9 +30,6 @@ public class PostModel {
     @Column("texto")
     private String text;
 
-    @Column("likes")
-    private Long likes;
-
     @Column("criado_em")
     private LocalDateTime createdAt;
 

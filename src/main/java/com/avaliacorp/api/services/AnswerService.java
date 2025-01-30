@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.avaliacorp.api.exceptions.ForbiddenActionException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.AnswerModel;
 import com.avaliacorp.api.models.FirmModel;
@@ -55,6 +56,7 @@ public class AnswerService {//Serviço que opera as Respostas (Answers)
         return answerRepository.save(data);
     }
 
+    @Transactional
     public List<AnswerModel> findByPostId(Integer postId){
         //Verifica se postId é null
         verifyInteger(postId, "PostId param must not be null");
@@ -64,6 +66,37 @@ public class AnswerService {//Serviço que opera as Respostas (Answers)
 
         //Finalmente, procura as respostas que tenham o postId
         return answerRepository.findByPostId(postId);
+    }
+
+    @Transactional
+    public AnswerModel update(String text, String firmId, Integer id){
+        verifyInteger(id, "Id param must not be null");
+        verifyString(firmId, "FirmId param must not be null");
+
+        var firm = firmRepository.findById(firmId).orElseThrow(() -> new NotFoundException("The Firm was not found"));
+        var answer = answerRepository.findById(id).orElseThrow(() -> new NotFoundException("The Answer was not found"));
+
+        if(!answer.getCnpj().equals(firm.getCNPJ())){
+            throw new ForbiddenActionException("The Firm does not own the answer");
+        }
+
+        answer.setText(text);
+        return answerRepository.save(answer);
+    }
+
+    @Transactional
+    public void delete(String firmId, Integer id){
+        verifyInteger(id, "Id param must not be null");
+        verifyString(firmId, "FirmId param must not be null");
+
+        var firm = firmRepository.findById(firmId).orElseThrow(() -> new NotFoundException("The Firm was not found"));
+        var answer = answerRepository.findById(id).orElseThrow(() -> new NotFoundException("The Answer was not found"));
+
+        if(!answer.getCnpj().equals(firm.getCNPJ())){
+            throw new ForbiddenActionException("The Firm does not own the answer");
+        }
+
+        answerRepository.delete(answer);
     }
 
 
