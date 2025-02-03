@@ -84,6 +84,7 @@ public class PostController {
 
         try {
             List<PostModel> posts = service.searchByTitle(title, limit);
+            System.err.println(posts);
             if(posts.isEmpty()){
                 return ResponseEntity.status(HttpStatus.OK).body("No posts were found");
             }

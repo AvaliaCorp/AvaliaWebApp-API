@@ -3,6 +3,7 @@ package com.avaliacorp.api.services;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.avaliacorp.api.exceptions.ForbiddenActionException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.LikeModel;
 import com.avaliacorp.api.repositories.CommentRepository;
@@ -52,6 +53,14 @@ public class LikeService {
             throw new IllegalArgumentException("Both postId and commentId can not be null, thou must choose one of them");
 
         LikeModel like = new LikeModel(userId, postId, commentId);
+
+        LikeModel doesLikeAlreadyExists = likeRepository.findUnique(like);
+        System.out.println(like);
+
+        if(doesLikeAlreadyExists != null){
+            throw new ForbiddenActionException("User can not like a post or a comment twice");
+        }
+
         return likeRepository.save(like);
     }
 
@@ -70,16 +79,23 @@ public class LikeService {
     @Transactional
     public void delete(String userId, Integer postId, Integer commentId){
         verifyString(userId, "UserId param must not be null");
-        verifyInteger(postId, "PostId param must not be null");
-        verifyInteger(commentId, "CommentId param must not be null");
 
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("The User does not exist"));
-        if(postId != null)
+        if(postId != null && commentId != null)
+            throw new IllegalArgumentException("Both postId and commentId can not be defined, thou must choose only one");
+        else if(postId != null)
             postRepository.findById(postId).orElseThrow(() -> new NotFoundException("The Post does not exist"));
-        else
+        else if(commentId != null)
             commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("The Comment does not exist"));
+        else
+            throw new IllegalArgumentException("Both postId and commentId can not be null, thou must choose one of them");
 
         LikeModel like = new LikeModel(userId, postId, commentId);
+
+        LikeModel doesLikeExists = likeRepository.findUnique(like);
+
+        if(doesLikeExists == null) throw new NotFoundException("The like does not exists");
+
         likeRepository.delete(like);
     }
 }

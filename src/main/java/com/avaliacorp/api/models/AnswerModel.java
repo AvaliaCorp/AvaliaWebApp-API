@@ -24,7 +24,7 @@ public class AnswerModel {
     @Column("avaliacao_id")
     private Integer postId;
 
-    @Column("data_resposra")
+    @Column("data_resposta")
     private LocalDateTime createdAt;
 
     public AnswerModel(Integer id, Integer postId, String text, String cnpj, LocalDateTime createdAt){

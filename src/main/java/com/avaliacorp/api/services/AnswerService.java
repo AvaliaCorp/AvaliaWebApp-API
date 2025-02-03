@@ -1,5 +1,6 @@
 package com.avaliacorp.api.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -53,6 +54,7 @@ public class AnswerService {//Serviço que opera as Respostas (Answers)
 
         //Se chegou até aqui, é porque nenhum erro ocorreu, já pode salvar a resposta
         data.setCnpj(firm.getCNPJ());//Seta o cnpj da resposta como o da empresa que foi encontrada
+        data.setCreatedAt(LocalDateTime.now());
         return answerRepository.save(data);
     }
 

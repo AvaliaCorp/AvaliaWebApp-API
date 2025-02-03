@@ -2,16 +2,11 @@ package com.avaliacorp.api.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.avaliacorp.api.exceptions.LogInFailedException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.EntityModel;
 import com.avaliacorp.api.models.LoginModel;
-import com.avaliacorp.api.models.TokenModel;
-import com.avaliacorp.api.services.FirmService;
 import com.avaliacorp.api.services.LoginService;
-import com.avaliacorp.api.services.UserService;
-import com.avaliacorp.api.utils.JwtTools;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,15 +29,6 @@ public class AuthController {
     //Autowired - Indica ao SpringBoot para instaciar automaticamente a variavel
     @Autowired
     private LoginService service;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private FirmService firmService;
-
-    @Autowired
-    private JwtTools jwtTools;
 
     @PostMapping("/login") //Indica que a função mapeia uma rota HTTP do tipo post chamada /login
     public ResponseEntity<String> login(@RequestBody LoginModel login) { //@RequestBody, indica para o Controller geral do spring que o parametro login deve ser preenchido pelo corpo da requisição
@@ -70,16 +56,8 @@ public class AuthController {
     public ResponseEntity<Object> getLoggedUser(@RequestHeader("Authorization") String auth) {
 
         try {
-            String[] tokenLiteral = auth.split(" ");
-            DecodedJWT decoded = jwtTools.verifyToken(tokenLiteral[1]);
-            TokenModel token = TokenModel.formatDecodedToken(decoded);
-            EntityModel<String> requestUser;
-            if(token.getType().equals("NormalUser")){
-                requestUser = userService.findById(token.getId());
-            }
-            else {
-                requestUser = firmService.findById(token.getId());
-            }
+            auth = auth.replace("Bearer ", "");
+            EntityModel<String> requestUser = service.getLoggedUser(auth);
             return ResponseEntity.ok().body(requestUser);
         }
         catch (Exception e) {

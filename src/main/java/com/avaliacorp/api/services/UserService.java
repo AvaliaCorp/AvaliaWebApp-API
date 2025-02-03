@@ -18,8 +18,8 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 @Service//Define pro String que é um Service, também sub-entende que é um componente
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PostRepository postRepository;
+    protected final UserRepository userRepository;
+    protected final PostRepository postRepository;
 
     public UserService(UserRepository userRepository, PostRepository postRepository){
         this.userRepository = userRepository;
@@ -35,7 +35,7 @@ public class UserService {
         }
 
         String hashedPassword = BCrypt.withDefaults().hashToString(12, data.getPassword().toCharArray());
-        UserModel user = new UserModel(data.getName().toLowerCase(), data.getEmail().toLowerCase(), hashedPassword);
+        UserModel user = new UserModel(data.getName().toLowerCase(), data.getEmail().toLowerCase(), hashedPassword, data.getRole());
 
         return userRepository.save(user);
     }

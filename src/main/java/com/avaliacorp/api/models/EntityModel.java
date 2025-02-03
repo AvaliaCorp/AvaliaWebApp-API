@@ -16,6 +16,14 @@ public abstract class EntityModel<ID> {
     @Column("senha") protected String password;
     @Version protected Long version;
 
+    public EntityModel(ID id, String name, String email, String password, Long version){
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.version = version;
+    }
+
     public EntityModel(ID id, String name, String email, String password){
         this.id = id;
         this.name = name;

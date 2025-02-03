@@ -1,7 +1,6 @@
 package com.avaliacorp.api.models;
 
-import java.util.UUID;
-
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.Data;
@@ -12,13 +11,17 @@ import lombok.EqualsAndHashCode;
 @Table("usuario")
 public class UserModel extends EntityModel<String> {
 
-    public UserModel(String id, String name, String email, String password){
+    @Column("tipo")
+    private String role;
+
+    public UserModel(String id, String name, String email, String password, String role){
         super(id, name, email, password);
+        this.role = role;
     }
 
-    public UserModel(String name, String email, String password){
+    public UserModel(String name, String email, String password, String role){
         super(name, email, password);
-        this.id = UUID.randomUUID().toString();
+        this.role = role;
     }
 
     public UserModel(){}

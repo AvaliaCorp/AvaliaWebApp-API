@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.avaliacorp.api.exceptions.EmailAlreadyInUseException;
+import com.avaliacorp.api.exceptions.ForbiddenActionException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.PostModel;
 import com.avaliacorp.api.models.TokenModel;
@@ -39,11 +41,12 @@ public class UserController {
     public ResponseEntity<Object> createNewUser(@RequestBody UserModel data) {
 
         try {
+            data.setRole("NormalUser");
             UserModel user = userService.create(data);
             return ResponseEntity.status(HttpStatus.CREATED).body(user);
         }
         catch(Exception e) {
-            if(e instanceof IllegalArgumentException){
+            if(e instanceof EmailAlreadyInUseException){
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -134,17 +137,25 @@ public class UserController {
     public record EditUserParams(String name, String email, String password) {}
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(@RequestParam String id){
+    public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String auth){
 
         try {
-            userService.delete(id);
+            auth = auth.replace("Bearer ", "");
+            TokenModel token = jwtTools.verifyAndDecodeToken(auth);
+            if(!token.getType().equals("NormalUser")){
+                throw new ForbiddenActionException("User route, cannot delete other types of account");
+            }
+            userService.delete(token.getId());
             return ResponseEntity.status(HttpStatus.OK).body("User deleted.");
         }
         catch (Exception e) {
             if(e instanceof NotFoundException){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            if(e instanceof ForbiddenActionException){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getClass() + ": " + e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getClass() + ": " + e.getMessage());
         }
 
     }

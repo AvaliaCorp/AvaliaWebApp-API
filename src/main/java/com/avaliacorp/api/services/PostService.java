@@ -7,11 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.avaliacorp.api.exceptions.ForbiddenActionException;
 import com.avaliacorp.api.exceptions.NotFoundException;
-import com.avaliacorp.api.models.LikeModel;
 import com.avaliacorp.api.models.PostModel;
 import com.avaliacorp.api.models.UserModel;
 import com.avaliacorp.api.repositories.FirmRepository;
-import com.avaliacorp.api.repositories.LikeRepository;
 import com.avaliacorp.api.repositories.PostRepository;
 import com.avaliacorp.api.repositories.UserRepository;
 
@@ -21,13 +19,11 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FirmRepository firmRepository;
-    private final LikeRepository likeRepository;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository, FirmRepository firmRepository, LikeRepository likeRepository){
+    public PostService(PostRepository postRepository, UserRepository userRepository, FirmRepository firmRepository){
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.firmRepository = firmRepository;
-        this.likeRepository = likeRepository;
     }
 
     private void verifyString(String str, String errorMessage) throws RuntimeException {
@@ -49,6 +45,8 @@ public class PostService {
 
         userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("The Author id was not found"));
 
+        post.setStatus(false);
+        post.setTitle(post.getTitle().toLowerCase());
         post.setAuthorId(authorId);
         post.setCreatedAt(LocalDateTime.now());
 
@@ -76,40 +74,17 @@ public class PostService {
         return postRepository.findByTitle(title, limit);
     }
 
-    public void incrementLike(Integer id, String userId){
-        //Verifica se não é nulo
+    public void closePost(String authorId, Integer id){
+        verifyString(authorId, "AuthorId param must not be null");
         verifyInteger(id, "Id param must not be null");
-        verifyString(userId, "UserId param must not be null");
+    
+        UserModel user = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("The user was not found"));
+        PostModel post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("The post was not found"));
 
-        //Verifica se existe
-        postRepository.findById(id).orElseThrow(() -> new NotFoundException("The Post was not found"));
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("The User was not found"));
+        if(user.getId().equals(post.getAuthorId()) && !user.getRole().equals("Admin")) throw new ForbiddenActionException("User does not own post");
 
-        LikeModel like = new LikeModel(userId, id, null);
-
-        //Verifica se o like já existe (Se o usuário já deu like)
-        var alreadyLiked = likeRepository.findUnique(like);
-        if(!(alreadyLiked == null)){
-            throw new ForbiddenActionException("Forbidden, the user already liked the post");
-        }
-
-        //Por fim, salva
-        likeRepository.save(like);
-    }
-
-    public void dislike(Integer id, String userId){
-        verifyInteger(id, "Id param must not be null");
-        verifyString(userId, "UserId param must not be null");
-
-        postRepository.findById(id).orElseThrow(() -> new NotFoundException("The Post was not found"));
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("The User was not found"));
-
-        LikeModel like = new LikeModel(userId, id, null);
-
-        var isLiked = likeRepository.findUnique(like);
-        verifyString(isLiked.getUserId(), "User does not liked the post");
-
-        likeRepository.delete(like);
+        post.setStatus(true);
+        postRepository.save(post);
     }
 
     //Reecebe o id do autor do post e o id do post

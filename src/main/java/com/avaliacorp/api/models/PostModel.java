@@ -30,15 +30,19 @@ public class PostModel {
     @Column("texto")
     private String text;
 
+    @Column("status")
+    private Boolean status;
+
     @Column("criado_em")
     private LocalDateTime createdAt;
 
-    public PostModel(Integer id, String title, String fkCNPJ, String authorId, String grade, String text){
+    public PostModel(Integer id, String title, String fkCNPJ, String authorId, String grade, String text, Boolean status){
         this.id = id;
         this.title = title;
         this.fkCNPJ = fkCNPJ;
         this.authorId = authorId;
         this.createdAt = LocalDateTime.now();
+        this.status = status;
         this.grade = grade;
         this.text = text;
     }
