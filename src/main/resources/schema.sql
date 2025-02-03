@@ -1,6 +1,6 @@
 
 create table empresa(
-	id varchar(40) primary key default(uuid()),
+	id varchar(40) primary key,
     nome varchar(45) not null,
 	email varchar(45) unique not null,
 	senha varchar(100) not null,
@@ -9,7 +9,7 @@ create table empresa(
 );
 
 create table usuario(
-	id varchar(40) primary key default(uuid()),
+	id varchar(40) primary key,
 	nome varchar(45) not null,
     tipo enum('NormalUser','Admin') default 'NormalUser' not null,
 	email varchar(45) unique not null,
