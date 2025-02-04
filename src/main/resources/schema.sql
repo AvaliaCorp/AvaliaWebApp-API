@@ -21,9 +21,8 @@ create table avaliacao(
 	id integer auto_increment primary key,
 	titulo varchar(45) not null,
     criado_em datetime default current_timestamp,
-    texto text not null,
+    texto mediumtext not null,
 	nota real,
-    likes long default(0),
     empresa_cnpj varchar(45),
 	usuario_id varchar(40),
     `status` boolean default(false),
@@ -33,10 +32,9 @@ create table avaliacao(
 
 create table comentario(
 	id integer auto_increment primary key,
-    texto text not null,
+    texto mediumtext not null,
     criado_em datetime default current_timestamp,
     autor_id varchar(40) not null,
-    likes long default(0),
     avaliacao_id integer,
     comentario_id integer,
     constraint fk_autor_comentario foreign key (autor_id) references usuario(id) on delete cascade,
@@ -46,7 +44,7 @@ create table comentario(
 
 create table resposta_empresa (
     id integer auto_increment primary key,
-    resposta text not null,
+    resposta mediumtext not null,
     data_resposta datetime default current_timestamp,
     empresa_cnpj varchar(45),
     avaliacao_id integer,

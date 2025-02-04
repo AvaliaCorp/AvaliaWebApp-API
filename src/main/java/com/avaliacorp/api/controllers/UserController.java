@@ -54,27 +54,6 @@ public class UserController {
 
     }
 
-    @GetMapping(value = "/get")
-    public ResponseEntity<Object> getUser(@RequestBody GetUserParams params) {
-
-        try {
-            UserModel user;
-            if(params.id != null){
-                user = userService.findById(params.id);
-            }
-            else if(params.email != null){
-                user = userService.findByEmail(params.email);
-            }
-            else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Params id or email expected.");
-            }
-            return ResponseEntity.status(HttpStatus.OK).body(user);
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
     @GetMapping("/get/posts")
     public ResponseEntity<Object> getUserPosts(@RequestHeader("Authorization") String auth) {
         jwtTools.init();

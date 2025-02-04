@@ -18,4 +18,10 @@ public interface PostRepository extends CrudRepository<PostModel, Integer> {
     @Query("SELECT * FROM avaliacao WHERE titulo LIKE :title LIMIT :limit")//Pesquisa vários posts pelo titulo com um limite definido
     List<PostModel> findByTitle(@Param("title") String title, @Param("limit") Integer limit);
 
+    @Query("SELECT MAX(nota) FROM avaliacao WHERE empresa_cnpj = :cnpj")
+    Double getMaxGradeWithCNPJFilter(@Param("cnpj") String cnpj);
+
+    @Query("SELECT MIN(nota) FROM avaliacao WHERE empresa_cnpj = :cnpj")
+    Double getMinGradeWithCNPJFilter(@Param("cnpj") String cnpj);
+
 }

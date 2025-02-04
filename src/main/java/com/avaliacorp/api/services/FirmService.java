@@ -10,7 +10,9 @@ import com.avaliacorp.api.exceptions.CnpjAlreadyInUseException;
 import com.avaliacorp.api.exceptions.EmailAlreadyInUseException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.FirmModel;
+import com.avaliacorp.api.models.PostModel;
 import com.avaliacorp.api.repositories.FirmRepository;
+import com.avaliacorp.api.repositories.PostRepository;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
@@ -18,9 +20,11 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 public class FirmService {
 
     private final FirmRepository firmRepository;
+    private final PostRepository postRepository;
 
-    public FirmService(FirmRepository firmRepository){
+    public FirmService(FirmRepository firmRepository, PostRepository postRepository){
         this.firmRepository = firmRepository;
+        this.postRepository = postRepository;
     }
 
     @Transactional
@@ -50,6 +54,32 @@ public class FirmService {
     public FirmModel findByCNPJ(String CNPJ) throws NotFoundException {
         return firmRepository.findByCNPJ(CNPJ).orElseThrow(() -> new NotFoundException("The CNPJ was not found"));
     }
+
+    @Transactional
+    public Metrics calcMetric(String cnpj){
+        List<PostModel> posts = postRepository.findByFkCNPJ(cnpj);
+        if(posts.isEmpty()){
+            throw new NotFoundException("There isn't any Post with the CNPJ");
+        }
+        Double med = 0d;
+        Integer aboveMed = 0;
+        Integer belowMed = 0;
+        for (PostModel post : posts) {
+            med = med + post.getGrade();
+            if(post.getGrade() > 5){
+                aboveMed++;
+            }
+            if(post.getGrade() < 6){
+                belowMed++;
+            }
+        }
+        med = med/posts.size();
+        Double highestGrade = postRepository.getMaxGradeWithCNPJFilter(cnpj);
+        Double lowestGrade = postRepository.getMinGradeWithCNPJFilter(cnpj);
+        Metrics metrics = new Metrics(med, aboveMed, belowMed, posts.size(), highestGrade, lowestGrade);
+        return metrics;
+    }
+    public record Metrics(Double med, Integer numAboveMedium, Integer numBelowMedium, Integer total, Double highestGrade, Double lowestGrade){}
 
     @Transactional
     public List<FirmModel> searchByName(String name, Integer limit) throws IllegalArgumentException {

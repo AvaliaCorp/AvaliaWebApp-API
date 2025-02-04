@@ -71,7 +71,7 @@ public class PostService {
 
     public List<PostModel> searchByTitle(String title, Integer limit){
         if(title == null) throw new IllegalArgumentException("title param must not be null");
-        return postRepository.findByTitle(title, limit);
+        return postRepository.findByTitle(title + "%", limit);
     }
 
     public void closePost(String authorId, Integer id){

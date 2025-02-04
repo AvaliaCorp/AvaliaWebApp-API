@@ -25,7 +25,7 @@ public class PostModel {
     private String authorId;
 
     @Column("nota")
-    private String grade;
+    private Double grade;
 
     @Column("texto")
     private String text;
@@ -36,7 +36,7 @@ public class PostModel {
     @Column("criado_em")
     private LocalDateTime createdAt;
 
-    public PostModel(Integer id, String title, String fkCNPJ, String authorId, String grade, String text, Boolean status){
+    public PostModel(Integer id, String title, String fkCNPJ, String authorId, Double grade, String text, Boolean status){
         this.id = id;
         this.title = title;
         this.fkCNPJ = fkCNPJ;

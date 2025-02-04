@@ -2,6 +2,7 @@ package com.avaliacorp.api.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,8 @@ public class UserService {
 
         String hashedPassword = BCrypt.withDefaults().hashToString(12, data.getPassword().toCharArray());
         UserModel user = new UserModel(data.getName().toLowerCase(), data.getEmail().toLowerCase(), hashedPassword, data.getRole());
+
+        user.setId(UUID.randomUUID().toString());
 
         return userRepository.save(user);
     }

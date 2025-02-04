@@ -10,6 +10,7 @@ import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.FirmModel;
 import com.avaliacorp.api.models.TokenModel;
 import com.avaliacorp.api.services.FirmService;
+import com.avaliacorp.api.services.FirmService.Metrics;
 import com.avaliacorp.api.utils.JwtTools;
 
 import java.util.List;
@@ -68,6 +69,23 @@ public class FirmController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+    }
+
+    @GetMapping("/metrics")
+    public ResponseEntity<String> getMetrics(@RequestParam String cnpj){
+
+        try {
+            Metrics metrics = firmService.calcMetric(cnpj);
+            String message = String.format("Total grades: %d\nAverage grade: %.2f\nNumber of grades above average: %d\nNumber of grades below average: %d\nHighest Grade: %.2f\nLowest Grade: %.2f", metrics.total(), metrics.med(), metrics.numAboveMedium(), metrics.numBelowMedium(), metrics.highestGrade(), metrics.lowestGrade());
+            return ResponseEntity.ok().body(message);
+        }
+        catch (Exception e) {
+            if(e instanceof NotFoundException){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getClass() + ": " + e.getMessage());
+            }
+            return ResponseEntity.internalServerError().body(e.getClass() + ": " + e.getMessage());
         }
 
     }
