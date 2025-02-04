@@ -1,45 +1,27 @@
 package com.avaliacorp.api.models;
 
-import java.util.UUID;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Table("usuario")
-public class UserModel {
-    
-    @Id
-    private String id;
+public class UserModel extends EntityModel<String> {
 
-    @Column("nome")
-    private String name;
+    @Column("tipo")
+    private String role;
 
-    @Column("email")
-    private String email;
-
-    @Column("senha")
-    private String password;
-
-    @Version
-    private Long version;
-
-    public UserModel(String id, String name, String email, String password){
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
+    public UserModel(String id, String name, String email, String password, String role){
+        super(id, name, email, password);
+        this.role = role;
     }
 
-    public UserModel(String name, String email, String password){
-        this.id = UUID.randomUUID().toString();
-        this.name = name;
-        this.email = email;
-        this.password = password;
+    public UserModel(String name, String email, String password, String role){
+        super(name, email, password);
+        this.role = role;
     }
 
     public UserModel(){}

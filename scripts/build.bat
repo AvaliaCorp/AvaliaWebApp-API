@@ -1,0 +1,3 @@
+@echo off
+echo Construindo projeto...
+./mvnw clean install

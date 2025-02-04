@@ -12,13 +12,12 @@ import java.util.Optional;
 
 public interface FirmRepository extends CrudRepository<FirmModel, String> {
 
-    Optional<FirmModel> findByCNPJ(String cNPJ);
+    Optional<FirmModel> findByCNPJ(String cNPJ);//Procura uma Firm (empresa) pelo cnpj
 
-    Optional<FirmModel> findByEmail(String email);
+    @Query("SELECT * FROM empresa WHERE email = :email")//Procura uma Firm pelo email
+    Optional<FirmModel> findByEmail(@Param("email") String email);
 
-    List<FirmModel> findManyByName(String name);
-
-    @Query("SELECT * FROM empresa WHERE nome LIKE :name LIMIT :limit")
+    @Query("SELECT * FROM empresa WHERE nome LIKE :name LIMIT :limit")//Pesquisa várias empresas pelo nome com um limite definido
     List<FirmModel> findManyByName(@Param("name") String name, @Param("limit") Integer limit);
 
 }

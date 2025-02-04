@@ -10,17 +10,21 @@ import com.avaliacorp.api.exceptions.CnpjAlreadyInUseException;
 import com.avaliacorp.api.exceptions.EmailAlreadyInUseException;
 import com.avaliacorp.api.exceptions.NotFoundException;
 import com.avaliacorp.api.models.FirmModel;
+import com.avaliacorp.api.models.PostModel;
 import com.avaliacorp.api.repositories.FirmRepository;
+import com.avaliacorp.api.repositories.PostRepository;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
-@Service
+@Service//Define pro String que é um Service, também sub-entende que é um componente
 public class FirmService {
 
     private final FirmRepository firmRepository;
+    private final PostRepository postRepository;
 
-    public FirmService(FirmRepository firmRepository){
+    public FirmService(FirmRepository firmRepository, PostRepository postRepository){
         this.firmRepository = firmRepository;
+        this.postRepository = postRepository;
     }
 
     @Transactional
@@ -36,8 +40,14 @@ public class FirmService {
         String uuid = UUID.randomUUID().toString();
         String hashedPassword = BCrypt.withDefaults().hashToString(12, firm.getPassword().toCharArray());
         firm.setId(uuid);
+        firm.setName(firm.getName().toLowerCase());
         firm.setPassword(hashedPassword);
         return firmRepository.save(firm);
+    }
+
+    @Transactional
+    public FirmModel findById(String id) throws NotFoundException {
+        return firmRepository.findById(id).orElseThrow(() -> new NotFoundException("The Firm Id was not found"));
     }
 
     @Transactional
@@ -46,12 +56,30 @@ public class FirmService {
     }
 
     @Transactional
-    public List<FirmModel> searchByName(String name) throws IllegalArgumentException {
-        if(name == null){
-            throw new IllegalArgumentException("Name param must not null");
+    public Metrics calcMetric(String cnpj){
+        List<PostModel> posts = postRepository.findByFkCNPJ(cnpj);
+        if(posts.isEmpty()){
+            throw new NotFoundException("There isn't any Post with the CNPJ");
         }
-        return firmRepository.findManyByName(name);
+        Double med = 0d;
+        Integer aboveMed = 0;
+        Integer belowMed = 0;
+        for (PostModel post : posts) {
+            med = med + post.getGrade();
+            if(post.getGrade() > 5){
+                aboveMed++;
+            }
+            if(post.getGrade() < 6){
+                belowMed++;
+            }
+        }
+        med = med/posts.size();
+        Double highestGrade = postRepository.getMaxGradeWithCNPJFilter(cnpj);
+        Double lowestGrade = postRepository.getMinGradeWithCNPJFilter(cnpj);
+        Metrics metrics = new Metrics(med, aboveMed, belowMed, posts.size(), highestGrade, lowestGrade);
+        return metrics;
     }
+    public record Metrics(Double med, Integer numAboveMedium, Integer numBelowMedium, Integer total, Double highestGrade, Double lowestGrade){}
 
     @Transactional
     public List<FirmModel> searchByName(String name, Integer limit) throws IllegalArgumentException {
