@@ -27,4 +27,8 @@ Caso queira executar pelo terminal, execute o comando:
 
 em um terminal aberto na pastado projeto.
 
-A documentação dos endpoints está por vir!
+Para acessar a documentação dos endpoints, enquanto a aplicação roda, acesse em um navegador:
+
+- <http://localhost:4200/swagger-docs.html>
+
+Melhorias para a documentação seram feitas!
