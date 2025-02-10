@@ -18,6 +18,7 @@ import com.avaliacorp.api.services.UserService;
 import com.avaliacorp.api.utils.JwtTools;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import io.swagger.v3.oas.annotations.Operation;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +38,7 @@ public class UserController {
     @Autowired
     private JwtTools jwtTools;
 
+    @Operation(summary = "Create an user, ignore version, role and id, those are automatically setted")
     @PostMapping("/create")
     public ResponseEntity<Object> createNewUser(@RequestBody UserModel data) {
 
